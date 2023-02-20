@@ -1,10 +1,9 @@
 #!/usr/bin/env -S ruby --enable=jit
 
-# 4 possible arguments (all optional):
+# 3 possible arguments (all optional):
 #   1. Name of the podcast, between commas if includes spaces (for ex. 'Crypto-Gram Security Podcast')
 #   2. Whether to prefix the files by the episode name (yes, unless specifieds NO)
-#   3. The path to the SQLITE DB, and
-#   4. The output folder
+#   3. The output folder
 #
 # If no arguments, returns the list of Podcast that have downloads in the app
 #
@@ -20,7 +19,6 @@ class PodcastsExport
     @podcast_name  = args[0].to_s
     @number_prefix = args[1].to_s.downcase != 'no'
     @output_folder = args[2].to_s
-    @db_path       = args[3].to_s
     if @podcast_name && !@podcast_name.empty?
       puts "- Podcast name:      '#{@podcast_name}'"\
            "- Number prefix?:    #{@number_prefix}"
@@ -31,13 +29,6 @@ class PodcastsExport
       @output_folder = File.expand_path @output_folder
       puts "- Output folder:   '#{@output_folder}'"
     end
-    if @db_path.nil? || @db_path.empty?
-      @db_path = File.expand_path('~/Library/Group Containers/243LU875E5.groups.com.apple.podcasts/'\
-                                  'Documents/MTLibrary.sqlite')
-    else
-      puts "- Podcasts database: '#{@db_path}'"
-    end
-    raise('Invalid path to the database') unless File.file?(@db_path)
     puts '==='
   end
 
@@ -47,7 +38,7 @@ class PodcastsExport
       FileUtils.mkdir_p(@output_folder)
     end
     podcast_subfolders = []
-    episodes = get_downloaded_episodes(@db_path)
+    episodes = get_downloaded_episodes(DATABASE)
     podcast_names = []
     num_downloaded = 0
     episodes.each do |(author, podcast, title, description, episode_number, pub_year, filename)|
@@ -198,11 +189,15 @@ class PodcastsExport
 
   private
 
+  DATABASE = File.expand_path('~/Library/Group Containers/243LU875E5.groups.com.apple.podcasts/'\
+                              'Documents/MTLibrary.sqlite')
+
   # macOS, internally, counts time from Midnight January 1, 2001 UTC.
   #   This is the difference, in seconds with Unix Epoch (since Midnight January 1, 1970 UTC)
   MACOS_SECS_OFFSET = 978_307_200
 
-  QUERY = 'SELECT p.ZAUTHOR, p.ZTITLE, e.ZTITLE, e.ZITEMDESCRIPTION, e.ZEPISODENUMBER, e.ZPUBDATE, e.ZASSETURL FROM ZMTEPISODE e '\
+  QUERY = 'SELECT p.ZAUTHOR, p.ZTITLE, e.ZTITLE, e.ZITEMDESCRIPTION, e.ZEPISODENUMBER, e.ZPUBDATE, '\
+          '       e.ZASSETURL FROM ZMTEPISODE e '\
           'JOIN ZMTPODCAST p ON e.ZPODCASTUUID = p.ZUUID '\
           'WHERE ZASSETURL NOTNULL;'
 
