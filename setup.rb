@@ -71,7 +71,7 @@ class InstallDependencies
         puts 'Installing HomeBrew...'
         system 'curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh'
       else
-        raise "curl is needed to continue, strage you don't seem to have it... "\
+        raise "curl is needed to continue... it is strange you didn't seem to have it... "\
               "Please download it and install it (for example, from https://curl.se/download.html)"
       end
     end

@@ -1,14 +1,7 @@
 #!/usr/bin/env -S ruby --enable=jit
 
-# 3 possible arguments (all optional):
-#   1. Name of the podcast, between commas if includes spaces (for ex. 'Crypto-Gram Security Podcast')
-#   2. Whether to prefix the files by the episode name (yes, unless specifieds NO)
-#   3. The output folder
-#
-# If no arguments, returns the list of Podcast that have downloads in the app
-#
-# Example:
-#   ./podcast_export 'Crypto-Gram Security Podcast' NO
+# Run with --help, or -h, to see the options:
+#   ./podcast_export -h
 
 require 'fileutils'
 require 'cgi'
@@ -16,20 +9,26 @@ require 'cgi'
 class PodcastsExport
   def initialize(args = nil)
     raise ('Gems missing, please execute setup.rb') unless sanity_check!
-    @podcast_name  = args[0].to_s
-    @number_prefix = args[1].to_s.downcase != 'no'
-    @output_folder = args[2].to_s
+    args_copy = args.dup
+    display_help  = args_copy.empty? || !(args_copy.delete('-h') || args_copy.delete('--help')).nil?
+    @list_podcasts = !(args_copy.delete('-l') || args_copy.delete('--list')).nil?
+    @podcast_name  = args_copy[0].to_s
+    @number_prefix = args_copy[1].to_s.downcase != 'no'
+    @output_folder = args_copy[2].to_s
     if @podcast_name && !@podcast_name.empty?
-      puts "- Podcast name:      '#{@podcast_name}'"\
-           "- Number prefix?:    #{@number_prefix}"
+      puts "- Podcast:  '#{@podcast_name}' (with#{'out' if !@number_prefix} episode number prefix)"
     end
     if @output_folder.nil? || @output_folder.empty?
       @output_folder = File.expand_path('~/Documents/Podcasts_Export/')
     else
       @output_folder = File.expand_path @output_folder
-      puts "- Output folder:   '#{@output_folder}'"
+      puts "- Output folder: '#{@output_folder}'"
     end
-    puts '==='
+    if display_help
+      puts help_text
+    else
+      puts '====='
+    end
   end
 
   def do_it!
@@ -39,7 +38,7 @@ class PodcastsExport
     end
     podcast_subfolders = []
     episodes = get_downloaded_episodes(DATABASE)
-    podcast_names = []
+    podcast_names = {}
     num_downloaded = 0
     episodes.each do |(author, podcast, title, description, episode_number, pub_year, filename)|
       pub_year = Time.at(pub_year + MACOS_SECS_OFFSET).year if pub_year && pub_year > 0
@@ -51,7 +50,9 @@ class PodcastsExport
       # episode_number is Integer or nil:
       safe_number   = "#{episode_number}. " if @number_prefix && episode_number && episode_number > 0
       safe_filename = clean_filename(filename)
-      podcast_names << podcast if podcast && !podcast.empty?
+      if podcast && !podcast.empty?
+        podcast_names[podcast] = podcast_names[podcast] ? (podcast_names[podcast] + 1) : 1
+      end
       if File.file?(safe_filename) && (@podcast_name.nil? || @podcast_name == podcast)
         file_extension = File.extname(safe_filename)  # .mp3, .mp4,...
         subfolder_array = [ @output_folder, safe_podcast ]
@@ -73,7 +74,7 @@ class PodcastsExport
         num_downloaded += 1
         # Tagging:
         if File.file?(output_filename)
-          puts 'File created!'
+          # puts 'File created!'
           values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
                             comment: description, track: episode_number, year: pub_year }
           mime_type = MimeMagic.by_magic File.open(output_filename)
@@ -84,23 +85,28 @@ class PodcastsExport
             when 'audio/mp4'
               PodcastsExport.tag_mp4_file(output_filename, **values_to_set)
           end
+        else
+          puts 'Unable to create the file'
+          puts
         end
-        puts
       # else
       #   raise "The file '#{safe_filename}' does not exist!!"
       end
     end
     if num_downloaded > 0
-      puts "Downloaded #{num_downloaded} episodes."
+      puts "Downloaded #{num_downloaded} episodes, at '#{@output_folder}'"
     else
       puts 'No episodes downloaded.'
+    end
+    if @list_podcasts
       if podcast_names.empty?
         puts "No podcasts available:"
       else
-        podcast_names = podcast_names.uniq.sort
+        podcast_names_only = podcast_names.keys.sort
         puts '---'
-        puts "Podcasts available (#{podcast_names.size}):"
-        podcast_names.each{|n| puts "#{n}"}
+        puts "#{podcast_names_only.size} Podcasts (with the number of episodes available):"
+        puts
+        podcast_names_only.each{|name| puts "#{name} (#{podcast_names[name]})"}
       end
     end
     # exit(0)
@@ -209,6 +215,42 @@ class PodcastsExport
   # true if all is OK
   def sanity_check!
     %w(mimemagic sqlite3 taglib).all?{|gem_name| gem_installed?(gem_name)}
+  end
+
+  def help_text
+    "========================================================\n"\
+    "Podcasts Export\n"\
+    "\n"\
+    "  Usage:\n"\
+    "    ./podcasts_export [podcast name] [episode number prefix] [download folder] [other options]\n"\
+    "\n"\
+    "  All parameters are optional:\n"\
+    "    - podcast name:  Name of a podcast, between commas if it includes spaces (for ex. "\
+      "'Crypto-Gram Security Podcast')\n"\
+    "    - episode number prefix: YES or NO (YES if not present). Prefixes file names by the "\
+      "episode's number.\n"\
+    "    - download folder: folder (directory) where to download the episode files (if none given, "\
+      "it uses '~/Documents/Podcasts_Export/').\n"\
+    "    - Other options (all prefixed by at least one '-'):\n"\
+    "      --list or -l: lists podcasts available, with episodes downloaded\n"\
+    "      --help or -h: shows this message.\n"\
+    "\n"\
+    "  If no parameters are present, if will display this help message (same as the --help option).\n"\
+    "\n"\
+    "  Examples:\n"\
+    "\n"\
+    "   ./podcasts_export -h\n"\
+    "     it shows this message.\n"\
+    "   ./podcasts_export -l\n"\
+    "     it list all podcasts available.\n"\
+    "   ./podcasts_export 'the Sharp End Podcast'\n"\
+    "     Downloads the episodes of 'the Sharp End Podcast'.\n"\
+    "   ./podcasts_export \"Nature Podcast\" -l\n"\
+    "     Downloads the episodes of the 'Nature Podcast', and also list all podcasts available.\n"\
+    "\n"\
+    "  Note: the name of the podcast to save needs to match what the Apple Podcasts app uses. You "\
+      "can use the '-l' option to see which is the actual name.\n"\
+    "========================================================\n"
   end
 
   def gem_installed?(name)
