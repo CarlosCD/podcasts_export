@@ -29,6 +29,3 @@ Then run from the Terminal:
     ./podcasts_export.rb 
 
 If no arguments are passed, it will show you a help message with all the options.
-
-It would also create a folder '~/Documents/Podcasts_Exports' if it doesn't exist (other folders could
-be used, the help message will tell you how to do so).

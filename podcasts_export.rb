@@ -12,11 +12,16 @@ class PodcastsExport
     args_copy = args.dup
     display_help  = args_copy.empty? || !(args_copy.delete('-h') || args_copy.delete('--help')).nil?
     @list_podcasts = !(args_copy.delete('-l') || args_copy.delete('--list')).nil?
+    @all_podcasts = !(args_copy.delete('-a') || args_copy.delete('--all')).nil?
     @podcast_name  = args_copy[0].to_s
     @number_prefix = args_copy[1].to_s.downcase != 'no'
     @output_folder = args_copy[2].to_s
-    if @podcast_name && !@podcast_name.empty?
-      puts "- Podcast:  '#{@podcast_name}' (with#{'out' if !@number_prefix} episode number prefix)"
+    @podcast_name = nil if (@podcast_name == '') || @all_podcasts
+    if @podcast_name
+      puts "- Podcast name:'#{@podcast_name}'"
+    end
+    if @podcast_name || @all_podcasts
+      puts "- It will #{'not ' if !@number_prefix}prefix the file names by the episode number."
     end
     if @output_folder.nil? || @output_folder.empty?
       @output_folder = File.expand_path('~/Documents/Podcasts_Export/')
@@ -32,11 +37,10 @@ class PodcastsExport
   end
 
   def do_it!
-    unless Dir.exist?(@output_folder)
-      puts "Creating the output folder, '#{@output_folder}'..."
+    if (@podcast_name || @all_podcasts) && !Dir.exist?(@output_folder)
+      puts "  * Creating the output folder, '#{@output_folder}'..."
       FileUtils.mkdir_p(@output_folder)
     end
-    podcast_subfolders = []
     episodes = get_downloaded_episodes(DATABASE)
     podcast_names = {}
     num_downloaded = 0
@@ -53,15 +57,17 @@ class PodcastsExport
       if podcast && !podcast.empty?
         podcast_names[podcast] = podcast_names[podcast] ? (podcast_names[podcast] + 1) : 1
       end
-      if File.file?(safe_filename) && (@podcast_name.nil? || @podcast_name == podcast)
+      # puts "safe_filename [#{safe_filename.class}]: '#{safe_filename}'"
+      # puts "File.file?(safe_filename) [#{File.file?(safe_filename).class}]: '#{File.file?(safe_filename)}'"
+      # puts "@podcast_name [#{@podcast_name.class}] : '#{@podcast_name}'"
+      if File.file?(safe_filename) && (@all_podcasts || @podcast_name == podcast)
         file_extension = File.extname(safe_filename)  # .mp3, .mp4,...
         subfolder_array = [ @output_folder, safe_podcast ]
         subfolder_array << pub_year.to_s if pub_year && pub_year > 0
         subfolder = File.join(*subfolder_array)
         unless Dir.exist?(subfolder)
-          puts "Creating the output folder, '#{subfolder}'"
+          puts "  * Creating the folder '#{subfolder}'..."
           FileUtils.mkdir_p(subfolder)
-            podcast_subfolders << subfolder
         end
         # puts "safe_number: '#{safe_number}', safe_title: '#{safe_title}', "\
         #.     "file_extension: '#{file_extension}'"
@@ -225,31 +231,38 @@ class PodcastsExport
     "    ./podcasts_export [podcast name] [episode number prefix] [download folder] [other options]\n"\
     "\n"\
     "  All parameters are optional:\n"\
-    "    - podcast name:  Name of a podcast, between commas if it includes spaces (for ex. "\
-      "'Crypto-Gram Security Podcast')\n"\
+    "    - podcast name:  Name of a podcast, between commas if it includes spaces (for ex. 'Healthy Hacker'). It "\
+      "needs to match the name the Apple Podcasts app uses (see the suggestion below).\n"\
     "    - episode number prefix: YES or NO (YES if not present). Prefixes file names by the "\
       "episode's number.\n"\
     "    - download folder: folder (directory) where to download the episode files (if none given, "\
       "it uses '~/Documents/Podcasts_Export/').\n"\
     "    - Other options (all prefixed by at least one '-'):\n"\
-    "      --list or -l: lists podcasts available, with episodes downloaded\n"\
+    "      --all  or -a: save all downloaded podcast (ignore the [podcast name] given, if any)\n"\
     "      --help or -h: shows this message.\n"\
+    "      --list or -l: lists podcast names available, with the number of episodes downloaded\n"\
     "\n"\
     "  If no parameters are present, if will display this help message (same as the --help option).\n"\
+    "\n"\
+    "  Suggestion: get the name of the podcast you want to save running the program with the '-l' option first, to "\
+      "see which are the actual names.\n"\
     "\n"\
     "  Examples:\n"\
     "\n"\
     "   ./podcasts_export -h\n"\
-    "     it shows this message.\n"\
+    "     it displays this message.\n"\
     "   ./podcasts_export -l\n"\
     "     it list all podcasts available.\n"\
     "   ./podcasts_export 'the Sharp End Podcast'\n"\
     "     Downloads the episodes of 'the Sharp End Podcast'.\n"\
+    "   ./podcasts_export Rework NO\n"\
+    "     Downloads the episodes of the 'Rework' podcast, not prefixing each file by the episode number.\n"\
     "   ./podcasts_export \"Nature Podcast\" -l\n"\
     "     Downloads the episodes of the 'Nature Podcast', and also list all podcasts available.\n"\
-    "\n"\
-    "  Note: the name of the podcast to save needs to match what the Apple Podcasts app uses. You "\
-      "can use the '-l' option to see which is the actual name.\n"\
+    "   ./podcasts_export -a\n"\
+    "     downloads the episodes available for all podcasts.\n"\
+    "   ./podcasts_export '-' NO -a\n"\
+    "     downloads all the podcast episodes, not prefixing the files by the episode name.\n"\
     "========================================================\n"
   end
 
