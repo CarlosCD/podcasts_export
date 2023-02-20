@@ -49,8 +49,3 @@ The next arguments are probably not so useful:
 
     ./podcasts_export.rb 'Nature Podcast' YES '~/Documents/temp_folder'
 
-4th argument: The Apple Podcasts database file to be read. This is an internal macOS setting, so it is
-probably not a parameter you need to change...
-
-    ./podcasts_export.rb 'Nature Podcast' NO '~/Documents/temp_folder' my_database.db
-
