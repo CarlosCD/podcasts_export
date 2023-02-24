@@ -7,7 +7,7 @@ This is a small command-line program to save those files aside...
 ### Setup
 
 This thing runs on macOS and uses Ruby. It may work in other systems, it may not. Ruby comes
-pre-installed in most Mac or Linux machines. You can verify that it is present by running:
+pre-installed in most Mac or Linux machines. You can verify that it is present by running in the Terminal app:
 
     ruby -v
 
