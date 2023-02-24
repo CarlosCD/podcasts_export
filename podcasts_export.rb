@@ -95,7 +95,19 @@ class PodcastsExport
             mime_type = MimeMagic.by_magic File.open(output_filename)
             # puts "mime type: '#{mime_type}'"
             values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
-                              comment: description, track: episode_number, year: pub_year }
+                              track: episode_number, year: pub_year }
+            no_html_description = description.gsub('&nbsp;', ' ').
+                                              gsub(/<\/?[^>]*>/, '').
+                                              strip
+            if no_html_description != description
+              # puts "  Description: '#{description}'"
+              # puts
+              # puts "  Description without HTML: '#{no_html_description}'"
+              puts'     Note: The description text was HTML. Tags has been stripped.'
+              values_to_set[:comment] = no_html_description
+            else
+              values_to_set[:comment] = description
+            end
             # puts "values: #{values_to_set}"
             case mime_type.to_s
               when 'audio/mpeg'
