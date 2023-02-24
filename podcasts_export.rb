@@ -13,6 +13,7 @@ class PodcastsExport
     display_help  = args_copy.empty? || !(args_copy.delete('-h') || args_copy.delete('--help')).nil?
     @list_podcasts = !(args_copy.delete('-l') || args_copy.delete('--list')).nil?
     @all_podcasts = !(args_copy.delete('-a') || args_copy.delete('--all')).nil?
+    @edit_media_tags = (args_copy.delete('-k') || args_copy.delete('--keep-tags')).nil?
     @podcast_name  = args_copy[0].to_s
     @number_prefix = args_copy[1].to_s.downcase != 'no'
     @output_folder = args_copy[2].to_s
@@ -28,6 +29,9 @@ class PodcastsExport
     else
       @output_folder = File.expand_path @output_folder
       puts "- Output folder: '#{@output_folder}'"
+    end
+    unless @edit_media_tags
+      puts '- Keeping the original file media tags'
     end
     if display_help
       puts help_text
@@ -85,18 +89,20 @@ class PodcastsExport
         num_downloaded += 1
         if File.file?(output_filename)
           # puts 'File created!'
-          # Tagging:
-          # puts 'Tagging'
-          values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
-                            comment: description, track: episode_number, year: pub_year }
-          # puts "values: #{values_to_set}"
-          mime_type = MimeMagic.by_magic File.open(output_filename)
-          # puts "mime type: '#{mime_type}'"
-          case mime_type.to_s
-            when 'audio/mpeg'
-              PodcastsExport.tag_mpeg_file(output_filename, **values_to_set)
-            when 'audio/mp4'
-              PodcastsExport.tag_mp4_file(output_filename, **values_to_set)
+          if @edit_media_tags
+            # Tagging:
+            # puts 'Tagging'
+            mime_type = MimeMagic.by_magic File.open(output_filename)
+            # puts "mime type: '#{mime_type}'"
+            values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
+                              comment: description, track: episode_number, year: pub_year }
+            # puts "values: #{values_to_set}"
+            case mime_type.to_s
+              when 'audio/mpeg'
+                PodcastsExport.tag_mpeg_file(output_filename, **values_to_set)
+              when 'audio/mp4'
+                PodcastsExport.tag_mp4_file(output_filename, **values_to_set)
+            end
           end
         else
           puts 'Unable to create the file'
@@ -267,10 +273,12 @@ Podcasts Export
     - podcast name:  Name of a podcast, between commas if it includes spaces (for ex. 'Healthy Hacker').
         It needs to match the name the Apple Podcasts app uses (see the suggestion below).
     - episode number prefix: YES or NO (YES if not present). Prefixes file names by the episode's number.
+        Note that in some cases this number is already part of the original episode title, so adding would show it twice (use NO then)
     - download folder: folder (directory) where to download the episode files (if none given, it uses '~/Documents/Podcasts_Export/').
     - Other options (all prefixed by at least one '-' and can be in any order):
       --all or -a: save all downloaded podcast (ignore the [podcast name] given, if any)
       --help or -h: shows this message
+      --keep-tags or -k: keeps the original files' content, not trying to "fix" the embedded media tags
       --list or -l: lists podcast names available, with the number of episodes downloaded
 
   If no parameters are present, if will display this help message (same as the --help option).
@@ -285,6 +293,8 @@ Podcasts Export
      it list all podcasts available.
    ./podcasts_export 'the Sharp End Podcast'
      Downloads the episodes of 'the Sharp End Podcast'.
+   ./podcasts_export -k Systematic
+     Downloads the episodes of Systematic, as-is, not editing media tags
    ./podcasts_export Rework NO
      Downloads the episodes of the 'Rework' podcast, not prefixing each file by the episode number.
    ./podcasts_export "Nature Podcast" -l
