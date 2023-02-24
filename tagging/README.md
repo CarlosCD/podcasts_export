@@ -1,7 +1,7 @@
 ## Podcasts Export - Misc MPEG tagging utilities
 
 These is some simple utility I wrote when I was looking for the embedded data (tags) in media files. It allows to see
-which tags are present in a media file (`.mp3`, .mpg`, `mpeg`, ...) of the type 'audio/mpeg`. So far I didn't find
+which tags are present in a media file (`.mp3`, `.mpg`, `mpeg`, ...) of the type 'audio/mpeg`. So far I didn't find
 much support for videos or mp4 formats... but this is a moving target.
 
 ### About media tags

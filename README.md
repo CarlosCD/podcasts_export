@@ -32,5 +32,5 @@ If no arguments are passed, it will show you a help message with all the options
 
 ### Some details on media tags
 
-I created some testing utility to inspect then embedded media tags for a give audio file. If of interests,
-[here it is](tagging/).
+When looking into the standards used for file embedded media tags I wrote a very simple test utility to inspect audio
+files. If of interests, [here it is](tagging/).

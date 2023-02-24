@@ -94,26 +94,23 @@ class PodcastsExport
             # puts 'Tagging'
             mime_type = MimeMagic.by_magic File.open(output_filename)
             # puts "mime type: '#{mime_type}'"
-            values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
-                              track: episode_number, year: pub_year }
-            no_html_description = description.gsub('&nbsp;', ' ').
-                                              gsub(/<\/?[^>]*>/, '').
-                                              strip
-            if no_html_description != description
-              # puts "  Description: '#{description}'"
-              # puts
-              # puts "  Description without HTML: '#{no_html_description}'"
-              puts'     Note: The description text was HTML. Tags has been stripped.'
-              values_to_set[:comment] = no_html_description
-            else
-              values_to_set[:comment] = description
-            end
-            # puts "values: #{values_to_set}"
-            case mime_type.to_s
-              when 'audio/mpeg'
-                PodcastsExport.tag_mpeg_file(output_filename, **values_to_set)
-              when 'audio/mp4'
-                PodcastsExport.tag_mp4_file(output_filename, **values_to_set)
+            if mime_type.to_s == 'audio/mpeg'
+              values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
+                                track: episode_number, year: pub_year }
+              no_html_description = description.gsub('&nbsp;', ' ').
+                                                gsub(/<\/?[^>]*>/, '').
+                                                strip
+              if no_html_description != description
+                # puts "  Description: '#{description}'"
+                # puts
+                # puts "  Description without HTML: '#{no_html_description}'"
+                puts'     Note: The description text was HTML. Tags has been stripped.'
+                values_to_set[:comment] = no_html_description
+              else
+                values_to_set[:comment] = description
+              end
+              # puts "values: #{values_to_set}"
+              PodcastsExport.tag_mpeg_file(output_filename, **values_to_set)
             end
           end
         else
@@ -194,34 +191,6 @@ class PodcastsExport
       end
     end
 
-    def tag_mp4_file(filename, album: nil, artist: nil, title: nil, genre: nil, comment: nil,
-                     track: nil, year: nil)
-      to_set = { album: album, artist: artist, title: title, genre: genre,
-                 comment: comment }.select{|k,v| !(v.nil? || v == '')}
-      to_set[:track] = track if track && track > 0
-      to_set[:year] = year if year && year > 0
-      if File.file?(filename) && to_set.any?
-        TagLib::MP4::File.open(filename) do |file|
-          tag = file.tag
-          has_changed = false
-          to_set.each do |k, v|
-            previous_value = tag.send(k) if tag[k.to_s].valid?
-            if previous_value.nil? || (previous_value == '') || (previous_value == 0)
-              if %i(track year).include?(k)
-                tag[k] = TagLib::MP4::Item.from_int(v)
-              else
-                tag[k] = TagLib::MP4::Item.from_string_list([k])
-              end
-              has_changed = true
-            end
-          end
-          puts "to_set: #{to_set} --- has_changed? #{has_changed}"
-          # TESTING ---
-          puts 'MP4 files are not supported at this moment.'
-          # file.save if has_changed
-        end
-      end
-    end
   end
 
   private
