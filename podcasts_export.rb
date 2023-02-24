@@ -46,8 +46,8 @@ class PodcastsExport
     num_downloaded = 0
     episodes.each do |(author, podcast, title, description, episode_number, pub_year, filename)|
       pub_year = Time.at(pub_year + MACOS_SECS_OFFSET).year if pub_year && pub_year > 0
-      # puts "'#{author}', '#{podcast}', '#{title}', #{episode_number} (#{episode_number.class}), "\
-      #.     "'#{filename}'"
+      # puts "  '#{author}', '#{podcast}', '#{title}', #{episode_number} (#{episode_number.class}), "\
+      #      "'#{filename}'"
       # puts("Publication year (#{pub_date.class}): #{pub_date}") if pub_date
       safe_podcast  = safe_for_filename(podcast)
       safe_title    = safe_for_filename(title, remove_final_dots: true)
@@ -61,6 +61,8 @@ class PodcastsExport
       # puts "File.file?(safe_filename) [#{File.file?(safe_filename).class}]: '#{File.file?(safe_filename)}'"
       # puts "@podcast_name [#{@podcast_name.class}] : '#{@podcast_name}'"
       if File.file?(safe_filename) && (@all_podcasts || @podcast_name == podcast)
+        # puts "  '#{author}', '#{podcast}', '#{title}', #{episode_number} (#{episode_number.class}), "\
+        #      "'#{filename}'"
         file_extension = File.extname(safe_filename)  # .mp3, .mp4,...
         subfolder_array = [ @output_folder, safe_podcast ]
         subfolder_array << pub_year.to_s if pub_year && pub_year > 0
@@ -70,21 +72,26 @@ class PodcastsExport
           FileUtils.mkdir_p(subfolder)
         end
         # puts "safe_number: '#{safe_number}', safe_title: '#{safe_title}', "\
-        #.     "file_extension: '#{file_extension}'"
+        #      "file_extension: '#{file_extension}'"
         filename_only ="#{safe_number}#{safe_title}#{file_extension}"
         output_filename = File.join(subfolder, filename_only)
         # puts "'#{safe_filename}' => '#{output_filename}'"
         puts " -> '#{filename_only}'"
+        if @number_prefix && (episode_number.nil? || episode_number <= 0)
+          puts '     Note: No episode number in the database'
+        end
         # puts "description: '#{description}'"
         FileUtils.cp safe_filename, output_filename
         num_downloaded += 1
-        # Tagging:
         if File.file?(output_filename)
           # puts 'File created!'
+          # Tagging:
+          # puts 'Tagging'
           values_to_set = { album: podcast, artist: author, title: title, genre: 'Podcast',
                             comment: description, track: episode_number, year: pub_year }
+          # puts "values: #{values_to_set}"
           mime_type = MimeMagic.by_magic File.open(output_filename)
-          # puts "mime type: #{mime_type} - values: #{values_to_set}"
+          # puts "mime type: '#{mime_type}'"
           case mime_type.to_s
             when 'audio/mpeg'
               PodcastsExport.tag_mpeg_file(output_filename, **values_to_set)
@@ -158,10 +165,9 @@ class PodcastsExport
             previous_value2 = tag2.send k
             if previous_value2.nil? || (previous_value2 == '') || (previous_value2 == 0) ||
                ((k == :comment) && (previous_value2.size < v.size))
-              # Note: strings over 30 characters would get truncated for ID3v1
               tag2.send "#{k}=".to_sym, v
               has_changed = true
-              # puts "V2 #{k}: #{previous_value2} => #{v}. Changed? #{has_changed}"
+              # puts "V2 #{k}: [#{previous_value2}] => [#{v}]. Changed? #{has_changed}"
             end
           end
           # Save changes if needed
@@ -192,8 +198,9 @@ class PodcastsExport
             end
           end
           puts "to_set: #{to_set} --- has_changed? #{has_changed}"
-          exit(0)  ## TESTING
-          file.save if has_changed
+          # TESTING ---
+          puts 'MP4 files are not supported at this moment.'
+          # file.save if has_changed
         end
       end
     end
@@ -224,46 +231,7 @@ class PodcastsExport
   end
 
   def help_text
-    "========================================================\n"\
-    "Podcasts Export\n"\
-    "\n"\
-    "  Usage:\n"\
-    "    ./podcasts_export [podcast name] [episode number prefix] [download folder] [other options]\n"\
-    "\n"\
-    "  All parameters are optional:\n"\
-    "    - podcast name:  Name of a podcast, between commas if it includes spaces (for ex. 'Healthy Hacker'). It "\
-      "needs to match the name the Apple Podcasts app uses (see the suggestion below).\n"\
-    "    - episode number prefix: YES or NO (YES if not present). Prefixes file names by the "\
-      "episode's number.\n"\
-    "    - download folder: folder (directory) where to download the episode files (if none given, "\
-      "it uses '~/Documents/Podcasts_Export/').\n"\
-    "    - Other options (all prefixed by at least one '-'):\n"\
-    "      --all  or -a: save all downloaded podcast (ignore the [podcast name] given, if any)\n"\
-    "      --help or -h: shows this message.\n"\
-    "      --list or -l: lists podcast names available, with the number of episodes downloaded\n"\
-    "\n"\
-    "  If no parameters are present, if will display this help message (same as the --help option).\n"\
-    "\n"\
-    "  Suggestion: get the name of the podcast you want to save running the program with the '-l' option first, to "\
-      "see which are the actual names.\n"\
-    "\n"\
-    "  Examples:\n"\
-    "\n"\
-    "   ./podcasts_export -h\n"\
-    "     it displays this message.\n"\
-    "   ./podcasts_export -l\n"\
-    "     it list all podcasts available.\n"\
-    "   ./podcasts_export 'the Sharp End Podcast'\n"\
-    "     Downloads the episodes of 'the Sharp End Podcast'.\n"\
-    "   ./podcasts_export Rework NO\n"\
-    "     Downloads the episodes of the 'Rework' podcast, not prefixing each file by the episode number.\n"\
-    "   ./podcasts_export \"Nature Podcast\" -l\n"\
-    "     Downloads the episodes of the 'Nature Podcast', and also list all podcasts available.\n"\
-    "   ./podcasts_export -a\n"\
-    "     downloads the episodes available for all podcasts.\n"\
-    "   ./podcasts_export '-' NO -a\n"\
-    "     downloads all the podcast episodes, not prefixing the files by the episode name.\n"\
-    "========================================================\n"
+    DATA.read
   end
 
   def gem_installed?(name)
@@ -287,3 +255,42 @@ class PodcastsExport
 end
 
 PodcastsExport.do_it!(ARGV)
+
+__END__
+========================================================
+Podcasts Export
+
+  Usage:
+    ./podcasts_export [podcast name] [episode number prefix] [download folder] [other options]
+
+  All parameters are optional:
+    - podcast name:  Name of a podcast, between commas if it includes spaces (for ex. 'Healthy Hacker').
+        It needs to match the name the Apple Podcasts app uses (see the suggestion below).
+    - episode number prefix: YES or NO (YES if not present). Prefixes file names by the episode's number.
+    - download folder: folder (directory) where to download the episode files (if none given, it uses '~/Documents/Podcasts_Export/').
+    - Other options (all prefixed by at least one '-' and can be in any order):
+      --all or -a: save all downloaded podcast (ignore the [podcast name] given, if any)
+      --help or -h: shows this message
+      --list or -l: lists podcast names available, with the number of episodes downloaded
+
+  If no parameters are present, if will display this help message (same as the --help option).
+
+  Suggestion: get the name of the podcast you want to save running the program with the '-l' option first, to see which are the actual names.
+
+  Examples:
+
+   ./podcasts_export -h
+     it displays this message.
+   ./podcasts_export -l
+     it list all podcasts available.
+   ./podcasts_export 'the Sharp End Podcast'
+     Downloads the episodes of 'the Sharp End Podcast'.
+   ./podcasts_export Rework NO
+     Downloads the episodes of the 'Rework' podcast, not prefixing each file by the episode number.
+   ./podcasts_export "Nature Podcast" -l
+     Downloads the episodes of the 'Nature Podcast', and also list all podcasts available.
+   ./podcasts_export -a
+     downloads the episodes available for all podcasts.
+   ./podcasts_export '-' NO -a
+     downloads all the podcast episodes, not prefixing the files by the episode name.
+========================================================
