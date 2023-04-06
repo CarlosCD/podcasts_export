@@ -1,6 +1,8 @@
 ## Podcasts Export
+![GitHub top language](https://img.shields.io/github/languages/top/CarlosCD/podcasts_export?color=red&style=plastic)
+![GitHub](https://img.shields.io/github/license/CarlosCD/podcasts_export?style=plastic)
 
-Some time go Apple changed its Podcasts app and removed the option for saving aside audio/video files.
+Some time ago Apple changed its Podcasts app and removed the option for saving aside audio/video files.
 Maybe they will add it back, maybe they will have it when you read this, maybe they will never do it...
 This is a small command-line program to save those files aside...
 
