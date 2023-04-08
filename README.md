@@ -22,6 +22,12 @@ extra libraries by running the `setup.rb` program from the Terminal (in mac OS):
 
 It may install Homebrew if you don't have it.
 
+In my particular case, I use [RVM: Ruby Version Manager](https://rvm.io/) to manage my Rubies (allows to
+have different versions of Ruby and switch among them, and also add/remove gems easily). You don't need to
+use it, but if you do, I have it configured for `Ruby 3.2.1@general`, if you want a different settings, you
+may want to change it at the files `.ruby-version` & `.ruby-gemset` (hidden in Unix). For details see RVM's
+website ([RVM Project Workflow](https://rvm.io/workflow/projects#project-file-ruby-version)).
+
 ### Run it
 
 First, using the Apple Podcasts app, download the Podcast episodes you want to keep.
@@ -32,7 +38,7 @@ Then run from the Terminal:
 
 If no arguments are passed, it will show you a help message with all the options.
 
-### Some details on media tags
+### On embedded media tags
 
 When looking into the standards used for file embedded media tags I wrote a very simple test utility to inspect audio
 files. If of interests, [here it is](tagging/).

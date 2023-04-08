@@ -8,7 +8,10 @@ require 'cgi'
 
 class PodcastsExport
   def initialize(args = nil)
-    raise ('Gems missing, please execute setup.rb') unless sanity_check!
+    unless sanity_check!
+      puts 'There are Ruby gems missing! Please execute "setup.rb" first.'
+      exit(1)
+    end
     args_copy = args.dup
     display_help  = args_copy.empty? || !(args_copy.delete('-h') || args_copy.delete('--help')).nil?
     @list_podcasts = !(args_copy.delete('-l') || args_copy.delete('--list')).nil?
