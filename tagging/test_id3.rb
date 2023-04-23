@@ -67,19 +67,19 @@ class TestId3
               end
               # puts "- DEBUG: tags frames: #{v2tag.frame_list.inspect}"
               frame_ids = v2tag.frame_list.collect(&:frame_id).sort
-              puts "   4c. Existing tags frames (#{v2tag.frame_list.size}):"
+              puts "   4b. Existing tags frames (#{v2tag.frame_list.size}):"
               frame_ids.each do |f_id|
                 puts "       #{f_id}: '#{FRAME_IDS[f_id.to_sym]}'"
               end
-              puts '   4d. tags frames candidates for comments/description:'
+              puts '   4c. Tags frames candidates for comments/description:'
               comment_frames = []
               frame_ids.select{|id| id.start_with?('T')}.
                         collect{|id| v2tag.frame_list(id)}.
                         flatten.
                         collect do |f|
-                          list = tf.field_list
+                          list = f.field_list
                           list = list[0] if list.size == 1
-                          comment_frames << { FRAME_IDS[tf.frame_id.to_sym] => list }
+                          comment_frames << { FRAME_IDS[f.frame_id.to_sym] => list }
                         end
               comment_frames.each do |h|
                 h.each do |k,v|

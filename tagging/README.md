@@ -7,10 +7,10 @@ for videos or mp4 formats... but this is a moving target.
 ### About media tags
 
 In audio podcasts is common to include episode notes in embedded tags, like a podcast description, useful links,
-author, etc. There are different de facto standards, each one with their limitations and different level of software
+author, etc. There are different de facto standards, each one with their limitations and different levels of software
 support.
 
-Some of those tags are text, using a particular character encoding, not all use UTF-8 or Unicode, so some cases
+Some of those tags are text, using a particular character encoding, not all use UTF-8 or Unicode, so in some cases
 non-latin characters could be lost. Also, in some cases, the text is written to be displayed in a web page, so it
 includes HTML tags as part of the text.
 
@@ -31,10 +31,9 @@ so useful.
 
 Given a media file (song, podcast, ...), this tool shows the embedded tags for different standards.
 
-Run it by passing the name of a file, for a given media file, including the path to get to it. For example
-`~/Documents/the_song_of_my_people.mp3`:
+Run it by passing the name of a file, for a given media file, including the path to get to it. For example:
 
     tagging/test_id3.rb "~/Documents/the_song_of_my_people.mp3"
 
-It also, if possible, extracts the embedded image, if there is any, as a file name "test_img.???" (the extension
-depends of the image type).
+It also, if possible, it extracts the embedded image, if there is any, as a file named "test_img.???" (the file
+extension depends of the image type).
