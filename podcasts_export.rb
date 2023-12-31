@@ -28,7 +28,7 @@ class PodcastsExport
       puts "- It will #{'not ' if !@number_prefix}prefix the file names by the episode number."
     end
     if @output_folder.nil? || @output_folder.empty?
-      @output_folder = File.expand_path('~/Documents/Podcasts_Export/')
+      @output_folder = File.expand_path('~/Documents/Podcasts_export/')
     else
       @output_folder = File.expand_path @output_folder
       puts "- Output folder: '#{@output_folder}'"
