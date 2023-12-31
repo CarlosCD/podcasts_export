@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ruby --enable=jit
+#!/usr/bin/env -S ruby
 
 require 'mimemagic'
 require 'taglib'

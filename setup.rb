@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ruby --enable=jit
+#!/usr/bin/env -S ruby
 
 # Installing the Ruby gems needed...
 #   and (perhaps) Homebrew and the taglib brew package.

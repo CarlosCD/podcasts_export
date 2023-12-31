@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ruby --enable=jit
+#!/usr/bin/env -S ruby
 
 # Run with --help, or -h, to see the options:
 #   ./podcast_export -h
