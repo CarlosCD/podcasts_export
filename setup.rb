@@ -13,7 +13,7 @@ class InstallDependencies
 
     private
 
-    GEMS_NEEDED = { 'mimemagic' => '0.4.3', 'sqlite3' => '1.4.2' }
+    GEMS_NEEDED = { 'mimemagic' => '0.4.3', 'sqlite3' => '2.2.0' }
 
     def install_needed_gems_maybe
       GEMS_NEEDED.each{|n,v| install_it_maybe(n,v)}
