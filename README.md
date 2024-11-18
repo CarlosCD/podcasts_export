@@ -15,18 +15,20 @@ pre-installed in most Mac or Linux machines. You can verify that it is present b
 
 It should show the version of Ruby you have, or err if you've none...
 
-Also it uses a few Ruby libraries (a.k.a. gems), and a media tagging library. You can install those
-extra libraries by running the `setup.rb` program from the Terminal (in mac OS):
+Also it uses a few Ruby libraries (a.k.a. gems), and a media tagging library. You can install
+those extra libraries by running the `setup.rb` program from the Terminal (in macOS):
 
     ./setup.rb
 
-It may install Homebrew if you don't have it.
+It may install Homebrew if you don't have it, and it uses the `Gemfile` to set the gems
+needed.
 
-In my particular case, I use [RVM: Ruby Version Manager](https://rvm.io/) to manage my Rubies (allows to
-have different versions of Ruby and switch among them, and also add/remove gems easily). You don't need to
-use it, but if you do, I have it configured for `Ruby 3.3.0@general`, if you want a different settings, you
-may want to change it at the files `.ruby-version` & `.ruby-gemset` (hidden in Unix). For details see RVM's
-website ([RVM Project Workflow](https://rvm.io/workflow/projects#project-file-ruby-version)).
+I use [RVM: Ruby Version Manager](https://rvm.io/) to manage my Rubies (allows different
+versions of Ruby and switch among them, and also add/remove gems easily). You don't need to
+use it, but if you do, I have it configured for `Ruby 3.3.6@general`, if you want a
+different setup, you may want to change it at the files `.ruby-version` & `.ruby-gemset`
+(hidden in Unix). For details see RVM's website
+([RVM Project Workflow](https://rvm.io/workflow/projects#project-file-ruby-version)).
 
 ### Run it
 
