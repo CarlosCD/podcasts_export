@@ -228,6 +228,7 @@ class PodcastsExport
     require name
     true
   rescue LoadError
+    puts "The '#{name}' gem doesn't seem to be installed"
     false
   end
 

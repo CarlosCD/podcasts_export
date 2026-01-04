@@ -4,20 +4,21 @@
 #   and (perhaps) Homebrew and the taglib brew package.
 #
 #   if the taglib-ruby gem is not installed, often this doesn't work:
-#     gem install taglib-ruby -v 1.1.3
+#     gem install taglib-ruby -v 2.0.0
 #   Based on the gem's README (at https://github.com/robinst/taglib-ruby):
-#   1. Get the TAGLIB_DIR by brew info taglib.
-#      For example: '/opt/homebrew/Cellar/taglib/1.13.1'
+#   1. Get the TAGLIB_DIR by brew info taglib
+#      For example: '/opt/homebrew/Cellar/taglib/2.0.2'
 #   2. Then run:
-#        TAGLIB_DIR=/opt/homebrew/Cellar/taglib/1.13.1 gem install taglib-ruby -v 1.1.3
+#        TAGLIB_DIR=/opt/homebrew/Cellar/taglib/2.0.2 gem install taglib-ruby -v 2.0.0
 #      Or via bundler:
-#        TAGLIB_DIR=/opt/homebrew/Cellar/taglib/1.13.1 bundle
+#        TAGLIB_DIR=/opt/homebrew/Cellar/taglib/2.0.2 bundle
 
 class InstallDependencies
   class << self
     def install_all!
       # Is the 'taglib-ruby' gem installed? If not, additional work
-      unless gem_present?('taglib-ruby', version: '1.1.3')
+      unless gem_present?('taglib-ruby', version: '2.0.0')
+        puts "The gem 'taglib-ruby', version '2.0.0' doesn't seem to be installed."
         install_homebrew!
         install_taglib_via_homebrew!
         taglib_dir = get_taglib_dir  # nil if unable to get it
@@ -35,14 +36,14 @@ class InstallDependencies
         install_taglib_via_homebrew!
         taglib_dir = get_taglib_dir  # it could be nil
         env_prefix = "TAGLIB_DIR=#{taglib_dir}" if taglib_dir
-        puts "Installing the 'taglib-ruby' gem, version 1.1.3..."
-        install_success = system "#{env_prefix} gem install taglib-ruby -v 1.1.3"
+        puts "Installing the 'taglib-ruby' gem, version 2.0.0..."
+        install_success = system "#{env_prefix} gem install taglib-ruby -v 2.0.0"
         unless install_success
-          puts "\nUnable to install the Ruby gem taglib-ruby version 1.1.3\n\n" \
+          puts "\nUnable to install the Ruby gem taglib-ruby version 2.0.0\n\n" \
                "You could try the following:\n" \
                " 1. Run 'brew info taglib' and find, in its output, the directory where Taglib was installed (probably starting by '/opt/homebrew/')\n" \
-               " 2. If, for example this directory is '/opt/homebrew/Cellar/taglib/1.13.1', then run the following command: \n" \
-               "    TAGLIB_DIR=/opt/homebrew/Cellar/taglib/1.13.1 gem install taglib-ruby -v 1.1.3"
+               " 2. If, for example this directory is '/opt/homebrew/Cellar/taglib/2.0.2', then run the following command: \n" \
+               "    TAGLIB_DIR=/opt/homebrew/Cellar/taglib/2.0.2 gem install taglib-ruby -v 2.0.0"
         end
       end
     end
