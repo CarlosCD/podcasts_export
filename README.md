@@ -25,7 +25,7 @@ needed.
 
 I use [RVM: Ruby Version Manager](https://rvm.io/) to manage my Rubies (allows different
 versions of Ruby and switch among them, and also add/remove gems easily). You don't need to
-use it, but if you do, I have it configured for `Ruby 3.3.6@general`, if you want a
+use it, but if you do, I have it configured for `Ruby 3.4.7@general`, if you want a
 different setup, you may want to change it at the files `.ruby-version` & `.ruby-gemset`
 (hidden in Unix). For details see RVM's website
 ([RVM Project Workflow](https://rvm.io/workflow/projects#project-file-ruby-version)).
